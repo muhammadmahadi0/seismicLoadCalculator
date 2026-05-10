@@ -5,17 +5,18 @@ import {
   SeismicSystemType,
   SeismicSystem,
   OccupancyCategory,
+  SiteCoefficients,
 } from '@/types';
 
-// BNBC 2020 Seismic Zone Coefficients by Location
+// BNBC 2020 Seismic Zones (Table 6.2.14) - Updated per PRD
 export const LOCATION_DATA: Record<Location, LocationData> = {
-  Dhaka: { name: 'Dhaka', z: 0.20, description: 'Capital City - High Seismic Zone' },
-  Chittagong: { name: 'Chittagong', z: 0.15, description: 'Port City - Moderate Seismic Zone' },
-  Sylhet: { name: 'Sylhet', z: 0.15, description: 'Northeastern Region - Moderate Seismic Zone' },
-  Khulna: { name: 'Khulna', z: 0.15, description: 'Southwestern Region - Moderate Seismic Zone' },
-  Barisal: { name: 'Barisal', z: 0.12, description: 'Southern Region - Low-Moderate Seismic Zone' },
-  Rangpur: { name: 'Rangpur', z: 0.12, description: 'Northwestern Region - Low-Moderate Seismic Zone' },
-  Mymensingh: { name: 'Mymensingh', z: 0.15, description: 'Central Region - Moderate Seismic Zone' },
+  Dhaka: { name: 'Dhaka', z: 0.20, zone: 2, description: 'Zone 2 - Capital City' },
+  Chittagong: { name: 'Chittagong', z: 0.28, zone: 3, description: 'Zone 3 - Port City' },
+  Sylhet: { name: 'Sylhet', z: 0.36, zone: 4, description: 'Zone 4 - Northeastern Region' },
+  Khulna: { name: 'Khulna', z: 0.15, zone: 2, description: 'Zone 2 - Southwestern Region' },
+  Barisal: { name: 'Barisal', z: 0.12, zone: 1, description: 'Zone 1 - Southern Region' },
+  Rangpur: { name: 'Rangpur', z: 0.12, zone: 1, description: 'Zone 1 - Northwestern Region' },
+  Mymensingh: { name: 'Mymensingh', z: 0.20, zone: 2, description: 'Zone 2 - Central Region' },
 };
 
 // BNBC 2020 Table 6.4.1 - Site Coefficient Fa (Short Period)
@@ -37,6 +38,24 @@ export const SITE_COEFFICIENT_FV: Record<SiteClass, { s1: Record<number, number>
   E: { s1: { 0.1: 4.0, 0.2: 4.5, 0.3: 4.8, 0.4: 5.0, 0.5: 5.2, 0.6: 5.4 } },
   F: { s1: { 0.1: 0, 0.2: 0, 0.3: 0, 0.4: 0, 0.5: 0, 0.6: 0 } },
 };
+
+// BNBC 2020 - Site Coefficients for Normalized Response Spectrum (S, TB, TC, TD)
+export const SITE_COEFFICIENTS: Record<SiteClass, SiteCoefficients> = {
+  A: { s: 1.0, tb: 0.15, tc: 0.40, td: 2.0 },  // Hard Rock (SA)
+  B: { s: 1.2, tb: 0.15, tc: 0.50, td: 2.0 },  // Rock (SB)
+  C: { s: 1.15, tb: 0.20, tc: 0.60, td: 2.0 }, // Very Dense Soil (SC)
+  D: { s: 1.35, tb: 0.20, tc: 0.80, td: 2.0 }, // Stiff Soil (SD)
+  E: { s: 1.4, tb: 0.15, tc: 0.50, td: 2.0 },  // Soft Clay (SE)
+  F: { s: 0, tb: 0, tc: 0, td: 0 }, // Requires site-specific evaluation
+};
+
+// Get site coefficients for normalized response spectrum
+export function getSiteCoefficients(siteClass: SiteClass): SiteCoefficients {
+  if (siteClass === 'F') {
+    return { s: 0, tb: 0, tc: 0, td: 0 };
+  }
+  return SITE_COEFFICIENTS[siteClass];
+}
 
 // BNBC 2020 Table 6.3.1 - Site Class from SPT N-values
 export interface SiteClassCriteria {

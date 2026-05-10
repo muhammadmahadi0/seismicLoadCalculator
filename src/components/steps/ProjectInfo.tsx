@@ -8,7 +8,7 @@ import { LOCATION_DATA, OCCUPANCY_DESCRIPTIONS } from '@/lib/bnbc-data';
 
 const locationOptions = Object.entries(LOCATION_DATA).map(([value, data]) => ({
   value,
-  label: `${data.name} (Z=${data.z})`,
+  label: `${data.name} (Zone ${data.zone}, Z=${data.z})`,
 }));
 
 const occupancyOptions: { value: OccupancyCategory; label: string }[] = [
@@ -78,7 +78,7 @@ export function ProjectInfoStep() {
           <div>
             <h4 className="font-medium text-emerald-800 dark:text-emerald-300">Seismic Zone Information</h4>
             <p className="text-sm text-emerald-700 dark:text-emerald-400 mt-1">
-              Current location: <strong>{formData.project.location}</strong> with Zone Coefficient Z = <strong className="font-mono">{LOCATION_DATA[formData.project.location].z}</strong>
+              Current location: <strong>{formData.project.location}</strong> — Zone <strong>{LOCATION_DATA[formData.project.location].zone}</strong> with Zone Coefficient Z = <strong className="font-mono">{LOCATION_DATA[formData.project.location].z}</strong>
             </p>
           </div>
         </div>

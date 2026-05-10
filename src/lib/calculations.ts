@@ -3,6 +3,7 @@ import {
   CalculationResults,
   SiteClass,
   SPTData,
+  SiteCoefficients,
 } from '@/types';
 import {
   LOCATION_DATA,
@@ -14,6 +15,7 @@ import {
   calculateSiteClass,
   SEISMIC_SYSTEMS,
   IMPORTANCE_FACTORS,
+  getSiteCoefficients,
 } from './bnbc-data';
 
 // Calculate average SPT-N value
@@ -23,16 +25,46 @@ export function calculateNavg(sptData: SPTData[]): number {
   return sum / sptData.length;
 }
 
-// Main calculation function
+// Calculate Normalized Acceleration Response Spectrum (C_s) per BNBC 2020
+// For 0 ≤ T ≤ TB: C_s = S * [1 + (T/TB) * (η * 2.5 - 1)]
+// For TB ≤ T ≤ TC: C_s = S * η * 2.5
+// For TC ≤ T ≤ TD: C_s = S * η * 2.5 * (TC/T)
+// For T > TD: C_s = S * η * 2.5 * (TC * TD) / T²
+// η = damping correction factor (default 1.0 for 5% damping)
+export function calculateCs(period: number, siteCoeffs: SiteCoefficients, eta: number = 1.0): number {
+  const { s, tb, tc, td } = siteCoeffs;
+
+  if (s === 0) return 0; // Site Class F with no coefficients
+
+  if (period <= tb) {
+    return s * (1 + (period / tb) * (eta * 2.5 - 1));
+  } else if (period <= tc) {
+    return s * eta * 2.5;
+  } else if (period <= td) {
+    return s * eta * 2.5 * (tc / period);
+  } else {
+    return s * eta * 2.5 * (tc * td) / (period * period);
+  }
+}
+
+// Calculate Design Spectral Acceleration (S_a) per BNBC 2020
+// S_a = (2/3) * Z * I * C_s
+export function calculateSa(z: number, i: number, cs: number): number {
+  return (2 / 3) * z * i * cs;
+}
+
+// Main calculation function - BNBC 2020 Compliant
 export function calculateSeismicParameters(
   formData: SeismicFormData,
-  buildingHeight: number
+  buildingHeight: number,
+  siteSpecificCoeffs?: SiteCoefficients // For Site Class F manual entry
 ): CalculationResults {
   const { project, sptData, manualSiteClass, seismicSystem, loads, geometry } = formData;
 
   // Get location data
   const locationData = LOCATION_DATA[project.location];
   const z = locationData.z;
+  const zone = locationData.zone;
 
   // Determine Site Class
   let siteClass: SiteClass;
@@ -48,9 +80,17 @@ export function calculateSeismicParameters(
   // Get spectral accelerations
   const { ss, s1 } = getDefaultSpectralAccelerations(project.location);
 
-  // Get site coefficients
-  const fa = siteClass !== 'F' ? getFa(siteClass, ss) : 0;
-  const fv = siteClass !== 'F' ? getFv(siteClass, s1) : 0;
+  // Get site coefficients (Fa, Fv for SDS/SD1)
+  const fa = siteClass !== 'F' || !siteSpecificCoeffs ? getFa(siteClass, ss) : siteSpecificCoeffs.s;
+  const fv = siteClass !== 'F' || !siteSpecificCoeffs ? getFv(siteClass, s1) : siteSpecificCoeffs.s;
+
+  // Get normalized response spectrum coefficients (S, TB, TC, TD)
+  let siteCoeffs: SiteCoefficients;
+  if (siteClass === 'F' && siteSpecificCoeffs) {
+    siteCoeffs = siteSpecificCoeffs;
+  } else {
+    siteCoeffs = getSiteCoefficients(siteClass);
+  }
 
   // Calculate SDS and SD1 (BNBC 6.4.2)
   const sds = (2 / 3) * fa * z;
@@ -68,39 +108,26 @@ export function calculateSeismicParameters(
   // Calculate Seismic Design Category
   const sdc = getSDC(sds, sd1, project.occupancyCategory);
 
-  // Calculate approximate period
+  // Calculate approximate period (Ta)
   const ta = calculateTa(buildingHeight, seismicSystem);
 
   // Calculate total seismic weight (W)
-  // W = Total Dead Load + 25% of Live Load (simplified)
+  // W = Total Dead Load + 25% of Live Load (per BNBC 6.4.2)
   const totalDeadLoad = loads.deadLoad * geometry.slabArea;
   const additionalDead = loads.additionalDeadLoad * geometry.slabArea;
   const liveLoadComponent = loads.liveLoad * geometry.slabArea * 0.25;
   const totalWeight = totalDeadLoad + additionalDead + liveLoadComponent;
 
-  // Calculate Seismic Response Coefficient (Cs)
-  // Cs = SD1 / (R/Ie) at T
-  // With limits per BNBC 6.4.2.1
+  // Calculate Normalized Response Spectrum (C_s) at period Ta
+  const cs = calculateCs(ta, siteCoeffs);
 
-  // Calculate Cs at Ta
-  let cs = sd1 / (r / i) * ta;
-  if (ta > 1.0) cs = sd1 / (r / i); // For T >= 1.0s
+  // Calculate Design Spectral Acceleration (S_a) per BNBC 2020
+  // S_a = (2/3) * Z * I * C_s
+  const sa = calculateSa(z, i, cs);
 
-  // Apply minimum and maximum limits
-  const csMin = Math.max(0.044 * sds * i, 0.01);
-  const csMax = sds / (r / i);
-
-  // Use the appropriate value
-  if (cs < csMin) cs = csMin;
-  if (cs > csMax) cs = csMax;
-
-  // Ensure Cs is not zero for site class F
-  if (siteClass === 'F') {
-    cs = 0;
-  }
-
-  // Calculate Base Shear (V)
-  const v = cs * totalWeight;
+  // Calculate Base Shear (V) per BNBC 2020
+  // V = S_a * W
+  const v = siteClass === 'F' && !siteSpecificCoeffs ? 0 : sa * totalWeight;
 
   // Calculate navg for display
   const navg = calculateNavg(sptData);
@@ -109,6 +136,7 @@ export function calculateSeismicParameters(
     siteClass,
     navg,
     z,
+    zone,
     fa,
     fv,
     sds,
@@ -121,6 +149,7 @@ export function calculateSeismicParameters(
     s1,
     sdc,
     cs,
+    sa,
     v,
     ta,
     totalWeight,
@@ -138,7 +167,7 @@ export function generateETABSOutput(results: CalculationResults, formData: Seism
     '======================================',
     `Project: ${project.projectName}`,
     `Location: ${project.location}`,
-    `Seismic Zone (Z): ${results.z.toFixed(3)}`,
+    `Seismic Zone: ${results.zone} (Z = ${results.z.toFixed(3)})`,
     '',
     '--- SEISMIC COEFFICIENTS ---',
     `Site Class: ${results.siteClass}`,
@@ -146,6 +175,11 @@ export function generateETABSOutput(results: CalculationResults, formData: Seism
     `Fv: ${results.fv.toFixed(3)}`,
     `SDS: ${results.sds.toFixed(4)}`,
     `SD1: ${results.sd1.toFixed(4)}`,
+    '',
+    '--- BNBC 2020 DESIGN SPECTRAL ACCELERATION ---',
+    `Normalized Response Spectrum (Cs): ${results.cs.toFixed(4)}`,
+    `Design Spectral Accel (Sa): ${results.sa.toFixed(4)}g`,
+    `Formula: Sa = (2/3) × Z × I × Cs`,
     '',
     '--- SYSTEM FACTORS ---',
     `Response Modification (R): ${results.r}`,
@@ -155,8 +189,8 @@ export function generateETABSOutput(results: CalculationResults, formData: Seism
     '',
     '--- DESIGN PARAMETERS ---',
     `Seismic Design Category: ${results.sdc}`,
-    `Seismic Response Coefficient (Cs): ${results.cs.toFixed(4)}`,
     `Base Shear (V): ${results.v.toFixed(2)} kN`,
+    `Formula: V = Sa × W`,
     `Total Seismic Weight (W): ${results.totalWeight.toFixed(2)} kN`,
     `Approximate Period (Ta): ${results.ta.toFixed(3)} s`,
     '',

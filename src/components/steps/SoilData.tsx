@@ -1,9 +1,9 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Input, Select, Card, Button } from '@/components/ui/Input';
 import { useSeismic } from '@/context/SeismicContext';
-import { SPTData, SiteClass } from '@/types';
+import { SPTData, SiteClass, SiteCoefficients, SiteSpecificData } from '@/types';
 import { calculateSiteClass } from '@/lib/bnbc-data';
 
 const siteClassOptions: { value: string; label: string }[] = [
@@ -17,7 +17,16 @@ const siteClassOptions: { value: string; label: string }[] = [
 ];
 
 export function SoilDataStep() {
-  const { formData, updateSPTData, updateManualSiteClass, results } = useSeismic();
+  const { formData, updateSPTData, updateManualSiteClass, updateSiteSpecificData, results } = useSeismic();
+
+  // Local state for site-specific coefficients (Site Class F)
+  const [siteSpecificEnabled, setSiteSpecificEnabled] = useState(false);
+  const [siteCoeffs, setSiteCoeffs] = useState<SiteCoefficients>({
+    s: 1.5,
+    tb: 0.15,
+    tc: 0.5,
+    td: 2.0,
+  });
 
   const handleAddRow = () => {
     if (formData.sptData.length >= 10) return;
@@ -39,6 +48,29 @@ export function SoilDataStep() {
 
   const autoSiteClass = formData.sptData.length > 0 ? calculateSiteClass(results?.navg || 0) : 'D';
   const displaySiteClass = formData.manualSiteClass || autoSiteClass;
+
+  const handleSiteSpecificToggle = (enabled: boolean) => {
+    setSiteSpecificEnabled(enabled);
+    if (enabled) {
+      updateSiteSpecificData({
+        enabled: true,
+        coefficients: siteCoeffs,
+      });
+    } else {
+      updateSiteSpecificData(null);
+    }
+  };
+
+  const handleCoeffChange = (field: keyof SiteCoefficients, value: number) => {
+    const newCoeffs = { ...siteCoeffs, [field]: value };
+    setSiteCoeffs(newCoeffs);
+    if (siteSpecificEnabled) {
+      updateSiteSpecificData({
+        enabled: true,
+        coefficients: newCoeffs,
+      });
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -138,6 +170,73 @@ export function SoilDataStep() {
           }
         />
       </Card>
+
+      {/* Site Class F - Special Handling */}
+      {displaySiteClass === 'F' && (
+        <Card>
+          <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-4 mb-4">
+            <div className="flex items-start gap-3">
+              <span className="text-xl">⚠️</span>
+              <div>
+                <h4 className="font-medium text-amber-800 dark:text-amber-300">Site-Specific Analysis Required</h4>
+                <p className="text-sm text-amber-700 dark:text-amber-400 mt-1">
+                  Site Class F requires site-specific geotechnical evaluation. Enter coefficients from site-specific study or leave disabled for zero results.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3 mb-4">
+            <input
+              type="checkbox"
+              id="siteSpecificEnabled"
+              checked={siteSpecificEnabled}
+              onChange={(e) => handleSiteSpecificToggle(e.target.checked)}
+              className="w-4 h-4 text-emerald-600 rounded border-slate-300 dark:border-slate-600"
+            />
+            <label htmlFor="siteSpecificEnabled" className="text-sm font-medium text-slate-700 dark:text-slate-300">
+              Enter site-specific coefficients from geotechnical report
+            </label>
+          </div>
+
+          {siteSpecificEnabled && (
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <Input
+                label="S (Spectral Accel.)"
+                type="number"
+                value={siteCoeffs.s}
+                onChange={(e) => handleCoeffChange('s', parseFloat(e.target.value) || 0)}
+                step="0.01"
+                min="0"
+              />
+              <Input
+                label="TB (s)"
+                type="number"
+                value={siteCoeffs.tb}
+                onChange={(e) => handleCoeffChange('tb', parseFloat(e.target.value) || 0)}
+                step="0.01"
+                min="0"
+              />
+              <Input
+                label="TC (s)"
+                type="number"
+                value={siteCoeffs.tc}
+                onChange={(e) => handleCoeffChange('tc', parseFloat(e.target.value) || 0)}
+                step="0.01"
+                min="0"
+              />
+              <Input
+                label="TD (s)"
+                type="number"
+                value={siteCoeffs.td}
+                onChange={(e) => handleCoeffChange('td', parseFloat(e.target.value) || 0)}
+                step="0.01"
+                min="0"
+              />
+            </div>
+          )}
+        </Card>
+      )}
 
       <div className="bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg p-4">
         <h4 className="font-medium text-slate-700 dark:text-slate-300 mb-2">BNBC 2020 Site Class Guidelines</h4>

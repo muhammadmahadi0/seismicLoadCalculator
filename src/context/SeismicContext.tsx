@@ -13,6 +13,8 @@ import {
   Location,
   OccupancyCategory,
   ExposureCategory,
+  SiteSpecificData,
+  SiteCoefficients,
 } from '@/types';
 import { DEFAULT_SPT_DATA } from '@/lib/bnbc-data';
 import { calculateSeismicParameters } from '@/lib/calculations';
@@ -26,6 +28,7 @@ interface SeismicContextType {
   updateGeometry: (data: Partial<BuildingGeometry>) => void;
   updateSPTData: (data: SPTData[]) => void;
   updateManualSiteClass: (siteClass: SiteClass | null) => void;
+  updateSiteSpecificData: (data: SiteSpecificData | null) => void;
   updateSeismicSystem: (system: SeismicSystemType) => void;
   updateLoads: (data: Partial<LoadData>) => void;
   buildingHeight: number;
@@ -58,6 +61,7 @@ const initialFormData: SeismicFormData = {
   geometry: defaultGeometry,
   sptData: DEFAULT_SPT_DATA,
   manualSiteClass: null,
+  siteSpecificData: null,
   seismicSystem: 'SMF',
   loads: defaultLoads,
 };
@@ -98,6 +102,13 @@ export function SeismicProvider({ children }: { children: ReactNode }) {
     }));
   }, []);
 
+  const updateSiteSpecificData = useCallback((data: SiteSpecificData | null) => {
+    setFormData(prev => ({
+      ...prev,
+      siteSpecificData: data,
+    }));
+  }, []);
+
   const updateSeismicSystem = useCallback((system: SeismicSystemType) => {
     setFormData(prev => ({
       ...prev,
@@ -113,7 +124,10 @@ export function SeismicProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const results = useMemo(() => {
-    return calculateSeismicParameters(formData, buildingHeight);
+    const siteSpecificCoeffs = formData.siteSpecificData?.enabled
+      ? formData.siteSpecificData.coefficients
+      : undefined;
+    return calculateSeismicParameters(formData, buildingHeight, siteSpecificCoeffs);
   }, [formData, buildingHeight]);
 
   const value: SeismicContextType = {
@@ -125,6 +139,7 @@ export function SeismicProvider({ children }: { children: ReactNode }) {
     updateGeometry,
     updateSPTData,
     updateManualSiteClass,
+    updateSiteSpecificData,
     updateSeismicSystem,
     updateLoads,
     buildingHeight,

@@ -174,15 +174,15 @@ export function ResultsStep() {
           <div className="text-center py-4">
             <span className="text-4xl font-bold font-mono text-blue-600 dark:text-blue-400">{results.v.toFixed(1)}</span>
             <span className="text-xl font-bold font-mono text-blue-600 dark:text-blue-400"> kN</span>
-            <p className="text-sm text-slate-500 dark:text-slate-400 mt-2">V = Cₛ × W</p>
+            <p className="text-sm text-slate-500 dark:text-slate-400 mt-2">V = Sₐ × W</p>
           </div>
         </Card>
 
         <Card>
           <h4 className="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-3">Seismic Zone</h4>
           <div className="text-center py-4">
-            <span className="text-4xl font-bold font-mono text-amber-600 dark:text-amber-400">Z = {location.z}</span>
-            <p className="text-sm text-slate-500 dark:text-slate-400 mt-2">{formData.project.location}</p>
+            <span className="text-4xl font-bold font-mono text-amber-600 dark:text-amber-400">Zone {results.zone}</span>
+            <p className="text-sm text-slate-500 dark:text-slate-400 mt-2">Z = {location.z}</p>
           </div>
         </Card>
       </div>
@@ -190,14 +190,18 @@ export function ResultsStep() {
       {/* Additional Info Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <Card>
-          <h4 className="text-lg font-semibold text-slate-800 dark:text-slate-100 mb-4">Additional Parameters</h4>
+          <h4 className="text-lg font-semibold text-slate-800 dark:text-slate-100 mb-4">Additional Parameters (BNBC 2020)</h4>
           <div className="grid grid-cols-2 gap-4">
             <div className="p-3 bg-slate-50 dark:bg-slate-700/50 rounded">
               <p className="text-xs text-slate-500 dark:text-slate-400">Total Weight (W)</p>
               <p className="text-lg font-bold font-mono text-slate-800 dark:text-slate-100">{results.totalWeight.toFixed(0)} kN</p>
             </div>
             <div className="p-3 bg-slate-50 dark:bg-slate-700/50 rounded">
-              <p className="text-xs text-slate-500 dark:text-slate-400">Response Coeff (Cₛ)</p>
+              <p className="text-xs text-slate-500 dark:text-slate-400">Design Sₐ (Sₐ = 2/3·Z·I·Cₛ)</p>
+              <p className="text-lg font-bold font-mono text-emerald-600 dark:text-emerald-400">{results.sa.toFixed(4)}g</p>
+            </div>
+            <div className="p-3 bg-slate-50 dark:bg-slate-700/50 rounded">
+              <p className="text-xs text-slate-500 dark:text-slate-400">Normalized Cₛ</p>
               <p className="text-lg font-bold font-mono text-slate-800 dark:text-slate-100">{results.cs.toFixed(4)}</p>
             </div>
             <div className="p-3 bg-slate-50 dark:bg-slate-700/50 rounded">

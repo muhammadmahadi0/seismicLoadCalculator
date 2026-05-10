@@ -45,18 +45,26 @@ src/
 ## Key Files & Their Purpose
 
 ### `src/lib/bnbc-data.ts` - BNBC 2020 Data
-- Location data (Dhaka Z=0.20, Chittagong Z=0.15, etc.)
+- Location data with seismic zones (Table 6.2.14): Dhaka Zone 2 (Z=0.20), Chittagong Zone 3 (Z=0.28), Sylhet Zone 4 (Z=0.36), etc.
 - Site coefficients Fa (Table 6.4.1), Fv (Table 6.4.2)
+- Normalized response spectrum coefficients (S, TB, TC, TD) by Site Class
 - Seismic systems with R, Ω₀, Cd values (Table 6.5.1)
-- Importance factors by occupancy category
+- Importance factors by occupancy category (Table 6.1.1)
 - Site class determination from SPT-N
 
-### `src/lib/calculations.ts` - Core Calculations
+### `src/lib/calculations.ts` - Core Calculations (BNBC 2020 Compliant)
 - `calculateSeismicParameters()` - Main function returning all results
 - `calculateNavg()` - Average SPT-N from soil data
-- `calculateTa()` - Approximate fundamental period
+- `calculateTa()` - Approximate fundamental period (BNBC 6.4.3.1)
+- `calculateCs()` - Normalized acceleration response spectrum
+- `calculateSa()` - Design spectral acceleration: S_a = (2/3) × Z × I × C_s
 - `generateETABSOutput()` - Formatted text for ETABS import
-- Formulas: SDS = (2/3) × Fa × Z, SD1 = (2/3) × Fv × Z, V = Cs × W
+- Formulas:
+  - SDS = (2/3) × Fa × Z
+  - SD1 = (2/3) × Fv × Z
+  - C_s (normalized response spectrum per BNBC 6.2.3)
+  - S_a = (2/3) × Z × I × C_s (Design Spectral Acceleration)
+  - V = S_a × W (Base Shear per BNBC 2020)
 
 ### `src/context/SeismicContext.tsx` - State Management
 - `formData` - All user inputs (project, geometry, SPT, system, loads)
@@ -107,9 +115,15 @@ npm run dev
 ### Important Engineering Notes
 - All calculations use client-side (no backend)
 - BNBC 2020 values are hardcoded - verify against official code if updating
-- Site Class F requires special geotechnical analysis (returns Cs=0)
+- Site Class F: Shows warning and allows manual entry of S, TB, TC, TD coefficients from site-specific study, or returns zero base shear
 - Default spectral accelerations: Ss=1.0g, S1=0.4g (conservative for Bangladesh)
 - Building weight W = Dead Load + 25% Live Load per BNBC 6.4.2
+- Seismic Design Category (SDC) determined per BNBC 6.6.1 & 6.6.2
+- Normalized response spectrum C_s calculation per BNBC 6.2.3:
+  - 0 ≤ T ≤ TB: C_s = S × [1 + (T/TB) × (η×2.5 - 1)]
+  - TB ≤ T ≤ TC: C_s = S × η × 2.5
+  - TC ≤ T ≤ TD: C_s = S × η × 2.5 × (TC/T)
+  - T > TD: C_s = S × η × 2.5 × (TC × TD) / T²
 
 ### Design Guidelines
 - Use emerald green (#059669) as primary color (engineering feel)
