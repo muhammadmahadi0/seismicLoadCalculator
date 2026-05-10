@@ -4,7 +4,7 @@ A web-based seismic load calculator for structural engineers in Bangladesh, base
 
 ## 🌐 Live Demo
 
-**Visit:** https://seismic-load-calculator.netlify.app
+**Visit:** https://seismicloadcal.netlify.app
 
 ---
 
