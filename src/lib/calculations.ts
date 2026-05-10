@@ -1,0 +1,185 @@
+import {
+  SeismicFormData,
+  CalculationResults,
+  SiteClass,
+  SPTData,
+} from '@/types';
+import {
+  LOCATION_DATA,
+  getFa,
+  getFv,
+  getDefaultSpectralAccelerations,
+  getSDC,
+  calculateTa,
+  calculateSiteClass,
+  SEISMIC_SYSTEMS,
+  IMPORTANCE_FACTORS,
+} from './bnbc-data';
+
+// Calculate average SPT-N value
+export function calculateNavg(sptData: SPTData[]): number {
+  if (sptData.length === 0) return 0;
+  const sum = sptData.reduce((acc, row) => acc + row.nValue, 0);
+  return sum / sptData.length;
+}
+
+// Main calculation function
+export function calculateSeismicParameters(
+  formData: SeismicFormData,
+  buildingHeight: number
+): CalculationResults {
+  const { project, sptData, manualSiteClass, seismicSystem, loads, geometry } = formData;
+
+  // Get location data
+  const locationData = LOCATION_DATA[project.location];
+  const z = locationData.z;
+
+  // Determine Site Class
+  let siteClass: SiteClass;
+  if (manualSiteClass) {
+    siteClass = manualSiteClass;
+  } else if (sptData.length > 0) {
+    const navg = calculateNavg(sptData);
+    siteClass = calculateSiteClass(navg);
+  } else {
+    siteClass = 'D'; // Default
+  }
+
+  // Get spectral accelerations
+  const { ss, s1 } = getDefaultSpectralAccelerations(project.location);
+
+  // Get site coefficients
+  const fa = siteClass !== 'F' ? getFa(siteClass, ss) : 0;
+  const fv = siteClass !== 'F' ? getFv(siteClass, s1) : 0;
+
+  // Calculate SDS and SD1 (BNBC 6.4.2)
+  const sds = (2 / 3) * fa * z;
+  const sd1 = (2 / 3) * fv * z;
+
+  // Get system parameters
+  const system = SEISMIC_SYSTEMS[seismicSystem];
+  const r = system.r;
+  const omega = system.omega;
+  const cd = system.cd;
+
+  // Get importance factor
+  const i = IMPORTANCE_FACTORS[project.occupancyCategory];
+
+  // Calculate Seismic Design Category
+  const sdc = getSDC(sds, sd1, project.occupancyCategory);
+
+  // Calculate approximate period
+  const ta = calculateTa(buildingHeight, seismicSystem);
+
+  // Calculate total seismic weight (W)
+  // W = Total Dead Load + 25% of Live Load (simplified)
+  const totalDeadLoad = loads.deadLoad * geometry.slabArea;
+  const additionalDead = loads.additionalDeadLoad * geometry.slabArea;
+  const liveLoadComponent = loads.liveLoad * geometry.slabArea * 0.25;
+  const totalWeight = totalDeadLoad + additionalDead + liveLoadComponent;
+
+  // Calculate Seismic Response Coefficient (Cs)
+  // Cs = SD1 / (R/Ie) at T
+  // With limits per BNBC 6.4.2.1
+
+  // Calculate Cs at Ta
+  let cs = sd1 / (r / i) * ta;
+  if (ta > 1.0) cs = sd1 / (r / i); // For T >= 1.0s
+
+  // Apply minimum and maximum limits
+  const csMin = Math.max(0.044 * sds * i, 0.01);
+  const csMax = sds / (r / i);
+
+  // Use the appropriate value
+  if (cs < csMin) cs = csMin;
+  if (cs > csMax) cs = csMax;
+
+  // Ensure Cs is not zero for site class F
+  if (siteClass === 'F') {
+    cs = 0;
+  }
+
+  // Calculate Base Shear (V)
+  const v = cs * totalWeight;
+
+  // Calculate navg for display
+  const navg = calculateNavg(sptData);
+
+  return {
+    siteClass,
+    navg,
+    z,
+    fa,
+    fv,
+    sds,
+    sd1,
+    r,
+    omega,
+    cd,
+    i,
+    ss,
+    s1,
+    sdc,
+    cs,
+    v,
+    ta,
+    totalWeight,
+  };
+}
+
+// Generate ETABS-compatible parameter string
+export function generateETABSOutput(results: CalculationResults, formData: SeismicFormData): string {
+  const { project, geometry, loads } = formData;
+
+  const lines = [
+    '======================================',
+    'BNBC 2020 SEISMIC PARAMETERS',
+    'ETABS Import Format',
+    '======================================',
+    `Project: ${project.projectName}`,
+    `Location: ${project.location}`,
+    `Seismic Zone (Z): ${results.z.toFixed(3)}`,
+    '',
+    '--- SEISMIC COEFFICIENTS ---',
+    `Site Class: ${results.siteClass}`,
+    `Fa: ${results.fa.toFixed(3)}`,
+    `Fv: ${results.fv.toFixed(3)}`,
+    `SDS: ${results.sds.toFixed(4)}`,
+    `SD1: ${results.sd1.toFixed(4)}`,
+    '',
+    '--- SYSTEM FACTORS ---',
+    `Response Modification (R): ${results.r}`,
+    `Overstrength Factor (Omega): ${results.omega}`,
+    `Deflection Amplification (Cd): ${results.cd}`,
+    `Importance Factor (I): ${results.i}`,
+    '',
+    '--- DESIGN PARAMETERS ---',
+    `Seismic Design Category: ${results.sdc}`,
+    `Seismic Response Coefficient (Cs): ${results.cs.toFixed(4)}`,
+    `Base Shear (V): ${results.v.toFixed(2)} kN`,
+    `Total Seismic Weight (W): ${results.totalWeight.toFixed(2)} kN`,
+    `Approximate Period (Ta): ${results.ta.toFixed(3)} s`,
+    '',
+    '--- BUILDING DATA ---',
+    `Number of Stories: ${geometry.numberOfStories}`,
+    `Floor Height: ${geometry.floorHeight} m`,
+    `Total Building Height: ${geometry.floorHeight * geometry.numberOfStories} m`,
+    `Floor Area: ${geometry.slabArea} m²`,
+    '',
+    '--- LOADS ---',
+    `Dead Load: ${loads.deadLoad} kN/m²`,
+    `Live Load: ${loads.liveLoad} kN/m²`,
+    `Additional Dead Load: ${loads.additionalDeadLoad} kN/m²`,
+    '',
+    '======================================',
+    'Generated by BNBC Seismic Calculator',
+    '======================================',
+  ];
+
+  return lines.join('\n');
+}
+
+// Generate short copy string for a single value
+export function generateSingleValueCopy(key: string, value: number | string): string {
+  return `${key}: ${value}`;
+}

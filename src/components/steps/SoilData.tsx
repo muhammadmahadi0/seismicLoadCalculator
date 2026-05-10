@@ -1,0 +1,155 @@
+'use client';
+
+import React from 'react';
+import { Input, Select, Card, Button } from '@/components/ui/Input';
+import { useSeismic } from '@/context/SeismicContext';
+import { SPTData, SiteClass } from '@/types';
+import { calculateSiteClass } from '@/lib/bnbc-data';
+
+const siteClassOptions: { value: string; label: string }[] = [
+  { value: '', label: 'Auto from SPT Data' },
+  { value: 'A', label: 'A - Hard Rock (Navg > 50)' },
+  { value: 'B', label: 'B - Rock (Navg 16-50)' },
+  { value: 'C', label: 'C - Very Dense Soil/Soft Rock (Navg 8-16)' },
+  { value: 'D', label: 'D - Stiff Soil (Navg < 8)' },
+  { value: 'E', label: 'E - Soft Clay' },
+  { value: 'F', label: 'F - Special Soils' },
+];
+
+export function SoilDataStep() {
+  const { formData, updateSPTData, updateManualSiteClass, results } = useSeismic();
+
+  const handleAddRow = () => {
+    if (formData.sptData.length >= 10) return;
+    const lastDepth = formData.sptData[formData.sptData.length - 1]?.depth || 0;
+    updateSPTData([...formData.sptData, { depth: lastDepth + 1.5, nValue: 20 }]);
+  };
+
+  const handleRemoveRow = (index: number) => {
+    if (formData.sptData.length <= 1) return;
+    const newData = formData.sptData.filter((_, i) => i !== index);
+    updateSPTData(newData);
+  };
+
+  const handleUpdateRow = (index: number, field: 'depth' | 'nValue', value: number) => {
+    const newData = [...formData.sptData];
+    newData[index] = { ...newData[index], [field]: value };
+    updateSPTData(newData);
+  };
+
+  const autoSiteClass = formData.sptData.length > 0 ? calculateSiteClass(results?.navg || 0) : 'D';
+  const displaySiteClass = formData.manualSiteClass || autoSiteClass;
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <h2 className="text-2xl font-bold text-slate-800 mb-2">Soil / Site Classification</h2>
+        <p className="text-slate-500">Enter SPT N-values or select site class directly</p>
+      </div>
+
+      <Card>
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-lg font-semibold text-slate-800">SPT-N Data</h3>
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={handleAddRow}
+            disabled={formData.sptData.length >= 10}
+          >
+            + Add Row
+          </Button>
+        </div>
+
+        <div className="overflow-x-auto">
+          <table className="w-full spt-table">
+            <thead>
+              <tr>
+                <th className="px-3 py-2 text-left">Depth (m)</th>
+                <th className="px-3 py-2 text-left">SPT N-Value</th>
+                <th className="px-3 py-2 text-left">d/N (m/blow)</th>
+                <th className="px-3 py-2 text-center w-16">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {formData.sptData.map((row, index) => (
+                <tr key={index}>
+                  <td className="px-3 py-2">
+                    <input
+                      type="number"
+                      value={row.depth}
+                      onChange={(e) => handleUpdateRow(index, 'depth', parseFloat(e.target.value) || 0)}
+                      className="w-20 px-2 py-1 border border-slate-300 rounded text-sm font-mono"
+                      step="0.5"
+                      min="0"
+                    />
+                  </td>
+                  <td className="px-3 py-2">
+                    <input
+                      type="number"
+                      value={row.nValue}
+                      onChange={(e) => handleUpdateRow(index, 'nValue', parseInt(e.target.value) || 0)}
+                      className="w-20 px-2 py-1 border border-slate-300 rounded text-sm font-mono"
+                      min="0"
+                    />
+                  </td>
+                  <td className="px-3 py-2 font-mono text-sm text-slate-600">
+                    {row.nValue > 0 ? (row.depth / row.nValue).toFixed(3) : '-'}
+                  </td>
+                  <td className="px-3 py-2 text-center">
+                    <button
+                      onClick={() => handleRemoveRow(index)}
+                      disabled={formData.sptData.length <= 1}
+                      className="text-red-500 hover:text-red-700 disabled:opacity-30 disabled:cursor-not-allowed"
+                    >
+                      ✕
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        <div className="mt-4 p-4 bg-slate-50 rounded-lg">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-slate-600">
+                Average SPT-N (Navg): <span className="font-mono font-semibold">{results?.navg.toFixed(1) || 0}</span>
+              </p>
+              <p className="text-sm text-slate-600 mt-1">
+                Auto Site Class: <span className="font-mono font-semibold">{autoSiteClass}</span>
+              </p>
+            </div>
+          </div>
+        </div>
+      </Card>
+
+      <Card>
+        <h3 className="text-lg font-semibold text-slate-800 mb-4">Manual Site Class Selection</h3>
+        <Select
+          label="Site Class"
+          value={formData.manualSiteClass || ''}
+          onChange={(e) => updateManualSiteClass(e.target.value as SiteClass || null)}
+          options={siteClassOptions}
+          helperText={
+            formData.manualSiteClass
+              ? `Manually selected: Site Class ${formData.manualSiteClass}`
+              : `Auto-calculated from SPT data: Site Class ${autoSiteClass}`
+          }
+        />
+      </Card>
+
+      <div className="bg-slate-50 border border-slate-200 rounded-lg p-4">
+        <h4 className="font-medium text-slate-700 mb-2">BNBC 2020 Site Class Guidelines</h4>
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-2 text-sm text-slate-600">
+          <div><strong>A</strong>: Hard Rock (Navg &gt; 50)</div>
+          <div><strong>B</strong>: Rock (Navg 16-50)</div>
+          <div><strong>C</strong>: Very Dense/Soft Rock (Navg 8-16)</div>
+          <div><strong>D</strong>: Stiff Soil (Navg &lt; 8)</div>
+          <div><strong>E</strong>: Soft Clay (&gt;10m, Navg &lt; 20)</div>
+          <div><strong>F</strong>: Special Soils</div>
+        </div>
+      </div>
+    </div>
+  );
+}
