@@ -4,24 +4,29 @@
 - **Type:** Next.js 14 Web Application (App Router)
 - **Purpose:** Calculate seismic loads per BNBC 2020 for structural engineers in Bangladesh
 - **Target Users:** Structural engineers who need ETABS-compatible seismic parameters
+- **Live URL:** https://seismic-load-calculator.netlify.app
 
 ## Tech Stack
 - Next.js 14.2.0 (App Router)
 - TypeScript
 - Tailwind CSS
 - React Context for state management
+- next-themes for dark mode
+- lucide-react for icons
 
 ## Project Structure
 ```
 src/
 ├── app/
-│   ├── globals.css      # Tailwind + custom engineering styles
-│   ├── layout.tsx        # Root layout with SeismicProvider
+│   ├── globals.css      # Tailwind + custom engineering styles + dark mode
+│   ├── layout.tsx       # Root layout with ThemeProvider, SeismicProvider
 │   └── page.tsx         # Main wizard UI (6 steps)
 ├── components/
-│   ├── ui/Input.tsx     # Form components (Input, Select, Button, Card)
-│   ├── StepIndicator.tsx # Sidebar navigation
-│   └── steps/           # 6 step components
+│   ├── ui/Input.tsx     # Form components (Input, Select, Button, Card) with dark:
+│   ├── StepIndicator.tsx # Sidebar navigation with dark mode
+│   ├── ThemeProvider.tsx # next-themes provider (defaultTheme="light")
+│   ├── ThemeToggle.tsx  # Floating dark mode toggle button (bottom-right)
+│   └── steps/           # 6 step components with full dark mode support
 │       ├── ProjectInfo.tsx
 │       ├── BuildingInfo.tsx
 │       ├── SoilData.tsx
@@ -65,6 +70,25 @@ src/
 - "Copy All for ETABS" button with formatted output
 - Base Shear (V), SDC, total weight display
 
+## Dark Mode Implementation
+
+### Configuration Files:
+- **tailwind.config.js**: `darkMode: 'class'` (critical!)
+- **ThemeProvider.tsx**: Wraps app, defaultTheme="light", uses localStorage
+- **ThemeToggle.tsx**: Floating circular button (fixed bottom-6 right-6)
+
+### How Dark Mode Works:
+1. `next-themes` adds/removes "dark" class on `<html>`
+2. Tailwind's `dark:` prefix applies styles when dark class is present
+3. Theme preference saved in localStorage (`bnbc-seismic-theme`)
+4. Respects saved preference on reload (no flicker when properly configured)
+
+### Dark Mode Classes Used:
+- Backgrounds: `bg-slate-50` (light) / `dark:bg-slate-900` (dark)
+- Cards: `bg-white` (light) / `dark:bg-slate-800` (dark)
+- Text: `text-slate-800` (light) / `dark:text-slate-100` (dark)
+- Borders: `border-slate-200` (light) / `dark:border-slate-700` (dark)
+
 ## How to Work On This
 
 ### Running Locally
@@ -78,7 +102,7 @@ npm run dev
 1. Edit relevant component in `src/components/steps/`
 2. To modify calculations, edit `src/lib/calculations.ts` or `src/lib/bnbc-data.ts`
 3. Test with `npm run build` (type checking)
-4. Commit and push to GitHub
+4. Commit and push to GitHub - Netlify auto-deploys
 
 ### Important Engineering Notes
 - All calculations use client-side (no backend)
@@ -92,3 +116,13 @@ npm run dev
 - JetBrains Mono for numbers/tables, Inter for UI text
 - Results page should resemble ETABS Seismic Loading dialog
 - Keep real-time updates - every input change recalculates immediately
+- Dark mode uses slate color palette: slate-900 bg, slate-800 cards
+
+## Git Workflow
+```bash
+# Make changes
+git add -A
+git commit -m "Description of changes"
+git push
+# Netlify auto-deploys from main branch
+```
