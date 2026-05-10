@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import { StepIndicator } from '@/components/StepIndicator';
 import { ProjectInfoStep } from '@/components/steps/ProjectInfo';
 import { BuildingInfoStep } from '@/components/steps/BuildingInfo';
@@ -12,11 +12,11 @@ import { useSeismic } from '@/context/SeismicContext';
 import { Button } from '@/components/ui/Input';
 
 function StepNavigation() {
-  const { currentStep, setCurrentStep, formData } = useSeismic();
+  const { currentStep, setCurrentStep } = useSeismic();
   const canProceed = currentStep < 6;
 
   return (
-    <div className="flex justify-between items-center mt-8 pt-6 border-t border-slate-200">
+    <div className="flex justify-between items-center mt-8 pt-6 border-t border-slate-200 dark:border-slate-700">
       <Button
         variant="secondary"
         onClick={() => setCurrentStep(Math.max(1, currentStep - 1))}
@@ -63,7 +63,7 @@ export default function Home() {
   const { currentStep, setCurrentStep, results } = useSeismic();
 
   return (
-    <div className="flex min-h-screen bg-slate-50">
+    <div className="flex min-h-screen bg-slate-50 dark:bg-slate-900">
       {/* Sidebar */}
       <StepIndicator currentStep={currentStep} onStepClick={setCurrentStep} />
 
@@ -71,8 +71,8 @@ export default function Home() {
       <main className="flex-1 p-8 overflow-auto">
         <div className="max-w-4xl mx-auto">
           <header className="mb-8">
-            <h1 className="text-3xl font-bold text-slate-800">BNBC 2020 Seismic Calculator</h1>
-            <p className="text-slate-500 mt-1">
+            <h1 className="text-3xl font-bold text-slate-800 dark:text-slate-100">BNBC 2020 Seismic Calculator</h1>
+            <p className="text-slate-500 dark:text-slate-400 mt-1">
               Calculate seismic loads for ETABS analysis based on Bangladesh National Building Code 2020
             </p>
           </header>
@@ -89,14 +89,14 @@ export default function Home() {
                       transition-all duration-200
                       ${currentStep >= step
                         ? 'bg-emerald-600 text-white'
-                        : 'bg-slate-200 text-slate-500'
+                        : 'bg-slate-200 dark:bg-slate-700 text-slate-500 dark:text-slate-400'
                       }
                     `}
                   >
                     {step}
                   </button>
                   {step < 6 && (
-                    <div className={`flex-1 h-1 rounded ${currentStep > step ? 'bg-emerald-600' : 'bg-slate-200'}`} />
+                    <div className={`flex-1 h-1 rounded ${currentStep > step ? 'bg-emerald-600' : 'bg-slate-200 dark:bg-slate-700'}`} />
                   )}
                 </React.Fragment>
               ))}
@@ -111,24 +111,24 @@ export default function Home() {
 
           {/* Quick Results Summary (Always visible) */}
           {results && currentStep < 6 && (
-            <div className="mt-8 p-4 bg-emerald-50 border border-emerald-200 rounded-lg">
-              <h3 className="font-semibold text-emerald-800 mb-2">Quick Results Preview</h3>
+            <div className="mt-8 p-4 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 rounded-lg">
+              <h3 className="font-semibold text-emerald-800 dark:text-emerald-300 mb-2">Quick Results Preview</h3>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                 <div>
-                  <span className="text-emerald-600">Site Class:</span>
-                  <span className="font-mono font-semibold ml-1">{results.siteClass}</span>
+                  <span className="text-emerald-600 dark:text-emerald-400">Site Class:</span>
+                  <span className="font-mono font-semibold ml-1 text-slate-800 dark:text-slate-200">{results.siteClass}</span>
                 </div>
                 <div>
-                  <span className="text-emerald-600">SDS:</span>
-                  <span className="font-mono font-semibold ml-1">{results.sds.toFixed(3)}g</span>
+                  <span className="text-emerald-600 dark:text-emerald-400">SDS:</span>
+                  <span className="font-mono font-semibold ml-1 text-slate-800 dark:text-slate-200">{results.sds.toFixed(3)}g</span>
                 </div>
                 <div>
-                  <span className="text-emerald-600">SD1:</span>
-                  <span className="font-mono font-semibold ml-1">{results.sd1.toFixed(3)}g</span>
+                  <span className="text-emerald-600 dark:text-emerald-400">SD1:</span>
+                  <span className="font-mono font-semibold ml-1 text-slate-800 dark:text-slate-200">{results.sd1.toFixed(3)}g</span>
                 </div>
                 <div>
-                  <span className="text-emerald-600">SDC:</span>
-                  <span className="font-mono font-semibold ml-1">{results.sdc}</span>
+                  <span className="text-emerald-600 dark:text-emerald-400">SDC:</span>
+                  <span className="font-mono font-semibold ml-1 text-slate-800 dark:text-slate-200">{results.sdc}</span>
                 </div>
               </div>
             </div>

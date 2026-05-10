@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import { SeismicProvider } from '@/context/SeismicContext';
+import { ThemeProvider } from '@/components/ThemeProvider';
+import { ThemeToggle } from '@/components/ThemeToggle';
 
 export const metadata: Metadata = {
   title: 'BNBC Seismic Calculator for ETABS',
@@ -13,11 +15,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body className="antialiased">
-        <SeismicProvider>
-          {children}
-        </SeismicProvider>
+        <ThemeProvider>
+          <SeismicProvider>
+            {children}
+            <ThemeToggle />
+          </SeismicProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

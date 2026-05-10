@@ -14,8 +14,8 @@ export function LoadsStep() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold text-slate-800 mb-2">Loads & Weight</h2>
-        <p className="text-slate-500">Enter design loads for seismic weight calculation</p>
+        <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-100 mb-2">Loads & Weight</h2>
+        <p className="text-slate-500 dark:text-slate-400">Enter design loads for seismic weight calculation</p>
       </div>
 
       <Card>
@@ -56,30 +56,30 @@ export function LoadsStep() {
       </Card>
 
       <Card>
-        <h3 className="text-lg font-semibold text-slate-800 mb-4">Weight Summary</h3>
+        <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-100 mb-4">Weight Summary</h3>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="bg-slate-50 p-4 rounded-lg">
-            <p className="text-sm text-slate-500">Total Dead Load</p>
-            <p className="text-xl font-bold font-mono text-slate-800">{totalDeadLoad.toFixed(1)} kN/m²</p>
+          <div className="bg-slate-50 dark:bg-slate-700/50 p-4 rounded-lg">
+            <p className="text-sm text-slate-500 dark:text-slate-400">Total Dead Load</p>
+            <p className="text-xl font-bold font-mono text-slate-800 dark:text-slate-100">{totalDeadLoad.toFixed(1)} kN/m²</p>
           </div>
-          <div className="bg-slate-50 p-4 rounded-lg">
-            <p className="text-sm text-slate-500">Effective Live Load (25%)</p>
-            <p className="text-xl font-bold font-mono text-slate-800">{(formData.loads.liveLoad * 0.25).toFixed(1)} kN/m²</p>
+          <div className="bg-slate-50 dark:bg-slate-700/50 p-4 rounded-lg">
+            <p className="text-sm text-slate-500 dark:text-slate-400">Effective Live Load (25%)</p>
+            <p className="text-xl font-bold font-mono text-slate-800 dark:text-slate-100">{(formData.loads.liveLoad * 0.25).toFixed(1)} kN/m²</p>
           </div>
-          <div className="bg-slate-50 p-4 rounded-lg">
-            <p className="text-sm text-slate-500">Total Floor Load</p>
-            <p className="text-xl font-bold font-mono text-slate-800">{totalFloorLoad.toFixed(1)} kN/m²</p>
+          <div className="bg-slate-50 dark:bg-slate-700/50 p-4 rounded-lg">
+            <p className="text-sm text-slate-500 dark:text-slate-400">Total Floor Load</p>
+            <p className="text-xl font-bold font-mono text-slate-800 dark:text-slate-100">{totalFloorLoad.toFixed(1)} kN/m²</p>
           </div>
-          <div className="bg-emerald-50 p-4 rounded-lg">
-            <p className="text-sm text-emerald-600">Building Weight (W)</p>
-            <p className="text-xl font-bold font-mono text-emerald-800">{totalBuildingWeight.toFixed(0)} kN</p>
+          <div className="bg-emerald-50 dark:bg-emerald-900/30 p-4 rounded-lg">
+            <p className="text-sm text-emerald-600 dark:text-emerald-400">Building Weight (W)</p>
+            <p className="text-xl font-bold font-mono text-emerald-800 dark:text-emerald-300">{totalBuildingWeight.toFixed(0)} kN</p>
           </div>
         </div>
       </Card>
 
-      <div className="bg-slate-50 border border-slate-200 rounded-lg p-4">
-        <h4 className="font-medium text-slate-700 mb-2">Note on Seismic Weight (W)</h4>
-        <p className="text-sm text-slate-600">
+      <div className="bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg p-4">
+        <h4 className="font-medium text-slate-700 dark:text-slate-300 mb-2">Note on Seismic Weight (W)</h4>
+        <p className="text-sm text-slate-600 dark:text-slate-400">
           According to BNBC 2020 Section 6.4.2, seismic weight W consists of the total dead load of the structure
           plus 25% of the live load (or snow load where applicable). This weight is used to calculate the
           design base shear V = Cₛ × W.

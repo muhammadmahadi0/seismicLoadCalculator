@@ -10,8 +10,8 @@ export function BuildingInfoStep() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold text-slate-800 mb-2">Building Geometry</h2>
-        <p className="text-slate-500">Enter building dimensions and story count</p>
+        <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-100 mb-2">Building Geometry</h2>
+        <p className="text-slate-500 dark:text-slate-400">Enter building dimensions and story count</p>
       </div>
 
       <Card>
@@ -77,23 +77,23 @@ export function BuildingInfoStep() {
       </Card>
 
       <Card>
-        <h3 className="text-lg font-semibold text-slate-800 mb-4">Building Summary</h3>
+        <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-100 mb-4">Building Summary</h3>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="bg-slate-50 p-4 rounded-lg text-center">
-            <p className="text-sm text-slate-500">Stories</p>
-            <p className="text-2xl font-bold font-mono text-slate-800">{formData.geometry.numberOfStories}</p>
+          <div className="bg-slate-50 dark:bg-slate-700/50 p-4 rounded-lg text-center">
+            <p className="text-sm text-slate-500 dark:text-slate-400">Stories</p>
+            <p className="text-2xl font-bold font-mono text-slate-800 dark:text-slate-100">{formData.geometry.numberOfStories}</p>
           </div>
-          <div className="bg-slate-50 p-4 rounded-lg text-center">
-            <p className="text-sm text-slate-500">Height</p>
-            <p className="text-2xl font-bold font-mono text-slate-800">{buildingHeight.toFixed(1)} m</p>
+          <div className="bg-slate-50 dark:bg-slate-700/50 p-4 rounded-lg text-center">
+            <p className="text-sm text-slate-500 dark:text-slate-400">Height</p>
+            <p className="text-2xl font-bold font-mono text-slate-800 dark:text-slate-100">{buildingHeight.toFixed(1)} m</p>
           </div>
-          <div className="bg-slate-50 p-4 rounded-lg text-center">
-            <p className="text-sm text-slate-500">Floor Area</p>
-            <p className="text-2xl font-bold font-mono text-slate-800">{formData.geometry.slabArea} m²</p>
+          <div className="bg-slate-50 dark:bg-slate-700/50 p-4 rounded-lg text-center">
+            <p className="text-sm text-slate-500 dark:text-slate-400">Floor Area</p>
+            <p className="text-2xl font-bold font-mono text-slate-800 dark:text-slate-100">{formData.geometry.slabArea} m²</p>
           </div>
-          <div className="bg-slate-50 p-4 rounded-lg text-center">
-            <p className="text-sm text-slate-500">Plan Area</p>
-            <p className="text-2xl font-bold font-mono text-slate-800">{(formData.geometry.planLength * formData.geometry.planWidth).toFixed(0)} m²</p>
+          <div className="bg-slate-50 dark:bg-slate-700/50 p-4 rounded-lg text-center">
+            <p className="text-sm text-slate-500 dark:text-slate-400">Plan Area</p>
+            <p className="text-2xl font-bold font-mono text-slate-800 dark:text-slate-100">{(formData.geometry.planLength * formData.geometry.planWidth).toFixed(0)} m²</p>
           </div>
         </div>
       </Card>

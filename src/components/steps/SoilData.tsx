@@ -43,13 +43,13 @@ export function SoilDataStep() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold text-slate-800 mb-2">Soil / Site Classification</h2>
-        <p className="text-slate-500">Enter SPT N-values or select site class directly</p>
+        <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-100 mb-2">Soil / Site Classification</h2>
+        <p className="text-slate-500 dark:text-slate-400">Enter SPT N-values or select site class directly</p>
       </div>
 
       <Card>
         <div className="flex justify-between items-center mb-4">
-          <h3 className="text-lg font-semibold text-slate-800">SPT-N Data</h3>
+          <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-100">SPT-N Data</h3>
           <Button
             variant="secondary"
             size="sm"
@@ -78,7 +78,7 @@ export function SoilDataStep() {
                       type="number"
                       value={row.depth}
                       onChange={(e) => handleUpdateRow(index, 'depth', parseFloat(e.target.value) || 0)}
-                      className="w-20 px-2 py-1 border border-slate-300 rounded text-sm font-mono"
+                      className="w-20 px-2 py-1 border border-slate-300 dark:border-slate-600 rounded text-sm font-mono bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
                       step="0.5"
                       min="0"
                     />
@@ -88,18 +88,18 @@ export function SoilDataStep() {
                       type="number"
                       value={row.nValue}
                       onChange={(e) => handleUpdateRow(index, 'nValue', parseInt(e.target.value) || 0)}
-                      className="w-20 px-2 py-1 border border-slate-300 rounded text-sm font-mono"
+                      className="w-20 px-2 py-1 border border-slate-300 dark:border-slate-600 rounded text-sm font-mono bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
                       min="0"
                     />
                   </td>
-                  <td className="px-3 py-2 font-mono text-sm text-slate-600">
+                  <td className="px-3 py-2 font-mono text-sm text-slate-600 dark:text-slate-400">
                     {row.nValue > 0 ? (row.depth / row.nValue).toFixed(3) : '-'}
                   </td>
                   <td className="px-3 py-2 text-center">
                     <button
                       onClick={() => handleRemoveRow(index)}
                       disabled={formData.sptData.length <= 1}
-                      className="text-red-500 hover:text-red-700 disabled:opacity-30 disabled:cursor-not-allowed"
+                      className="text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 disabled:opacity-30 disabled:cursor-not-allowed"
                     >
                       ✕
                     </button>
@@ -110,13 +110,13 @@ export function SoilDataStep() {
           </table>
         </div>
 
-        <div className="mt-4 p-4 bg-slate-50 rounded-lg">
+        <div className="mt-4 p-4 bg-slate-50 dark:bg-slate-700/50 rounded-lg">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-slate-600">
+              <p className="text-sm text-slate-600 dark:text-slate-300">
                 Average SPT-N (Navg): <span className="font-mono font-semibold">{results?.navg.toFixed(1) || 0}</span>
               </p>
-              <p className="text-sm text-slate-600 mt-1">
+              <p className="text-sm text-slate-600 dark:text-slate-300 mt-1">
                 Auto Site Class: <span className="font-mono font-semibold">{autoSiteClass}</span>
               </p>
             </div>
@@ -125,7 +125,7 @@ export function SoilDataStep() {
       </Card>
 
       <Card>
-        <h3 className="text-lg font-semibold text-slate-800 mb-4">Manual Site Class Selection</h3>
+        <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-100 mb-4">Manual Site Class Selection</h3>
         <Select
           label="Site Class"
           value={formData.manualSiteClass || ''}
@@ -139,9 +139,9 @@ export function SoilDataStep() {
         />
       </Card>
 
-      <div className="bg-slate-50 border border-slate-200 rounded-lg p-4">
-        <h4 className="font-medium text-slate-700 mb-2">BNBC 2020 Site Class Guidelines</h4>
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-2 text-sm text-slate-600">
+      <div className="bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg p-4">
+        <h4 className="font-medium text-slate-700 dark:text-slate-300 mb-2">BNBC 2020 Site Class Guidelines</h4>
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-2 text-sm text-slate-600 dark:text-slate-400">
           <div><strong>A</strong>: Hard Rock (Navg &gt; 50)</div>
           <div><strong>B</strong>: Rock (Navg 16-50)</div>
           <div><strong>C</strong>: Very Dense/Soft Rock (Navg 8-16)</div>

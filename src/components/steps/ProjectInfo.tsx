@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Input, Select, Card, Button } from '@/components/ui/Input';
+import { Input, Select, Card } from '@/components/ui/Input';
 import { useSeismic } from '@/context/SeismicContext';
 import { Location, OccupancyCategory, ExposureCategory } from '@/types';
 import { LOCATION_DATA, OCCUPANCY_DESCRIPTIONS } from '@/lib/bnbc-data';
@@ -32,8 +32,8 @@ export function ProjectInfoStep() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold text-slate-800 mb-2">Project Information</h2>
-        <p className="text-slate-500">Enter basic project details and location</p>
+        <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-100 mb-2">Project Information</h2>
+        <p className="text-slate-500 dark:text-slate-400">Enter basic project details and location</p>
       </div>
 
       <Card>
@@ -72,12 +72,12 @@ export function ProjectInfoStep() {
         </div>
       </Card>
 
-      <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-4">
+      <div className="bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 rounded-lg p-4">
         <div className="flex items-start gap-3">
           <span className="text-xl">ℹ️</span>
           <div>
-            <h4 className="font-medium text-emerald-800">Seismic Zone Information</h4>
-            <p className="text-sm text-emerald-700 mt-1">
+            <h4 className="font-medium text-emerald-800 dark:text-emerald-300">Seismic Zone Information</h4>
+            <p className="text-sm text-emerald-700 dark:text-emerald-400 mt-1">
               Current location: <strong>{formData.project.location}</strong> with Zone Coefficient Z = <strong className="font-mono">{LOCATION_DATA[formData.project.location].z}</strong>
             </p>
           </div>
