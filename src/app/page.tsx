@@ -1,7 +1,6 @@
 'use client';
 
 import React from 'react';
-import { StepIndicator } from '@/components/StepIndicator';
 import { ProjectInfoStep } from '@/components/steps/ProjectInfo';
 import { BuildingInfoStep } from '@/components/steps/BuildingInfo';
 import { SoilDataStep } from '@/components/steps/SoilData';
@@ -10,6 +9,8 @@ import { LoadsStep } from '@/components/steps/Loads';
 import { ResultsStep } from '@/components/steps/Results';
 import { useSeismic } from '@/context/SeismicContext';
 import { Button } from '@/components/ui/Input';
+
+const STEP_TITLES = ['Project Info', 'Building Info', 'Soil Data', 'Seismic System', 'Loads', 'Results'];
 
 function StepNavigation() {
   const { currentStep, setCurrentStep } = useSeismic();
@@ -63,12 +64,8 @@ export default function Home() {
   const { currentStep, setCurrentStep, results } = useSeismic();
 
   return (
-    <div className="flex min-h-screen bg-slate-50 dark:bg-slate-900">
-      {/* Sidebar */}
-      <StepIndicator currentStep={currentStep} onStepClick={setCurrentStep} />
-
-      {/* Main Content */}
-      <main className="flex-1 p-8 overflow-auto">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
+      <main className="p-8 overflow-auto">
         <div className="max-w-4xl mx-auto">
           <header className="mb-8">
             <h1 className="text-3xl font-bold text-slate-800 dark:text-slate-100">BNBC 2020 Seismic Calculator</h1>
@@ -78,25 +75,30 @@ export default function Home() {
           </header>
 
           {/* Progress indicator */}
-          <div className="mb-6">
+          <div className="mb-8">
             <div className="flex items-center gap-2">
               {[1, 2, 3, 4, 5, 6].map((step) => (
                 <React.Fragment key={step}>
-                  <button
-                    onClick={() => setCurrentStep(step)}
-                    className={`
-                      w-10 h-10 rounded-full flex items-center justify-center font-medium text-sm
-                      transition-all duration-200
-                      ${currentStep >= step
-                        ? 'bg-emerald-600 text-white'
-                        : 'bg-slate-200 dark:bg-slate-700 text-slate-500 dark:text-slate-400'
-                      }
-                    `}
-                  >
-                    {step}
-                  </button>
+                  <div className="flex flex-col items-center gap-1">
+                    <button
+                      onClick={() => setCurrentStep(step)}
+                      className={`
+                        w-10 h-10 rounded-full flex items-center justify-center font-medium text-sm
+                        transition-all duration-200
+                        ${currentStep >= step
+                          ? 'bg-emerald-600 text-white'
+                          : 'bg-slate-200 dark:bg-slate-700 text-slate-500 dark:text-slate-400'
+                        }
+                      `}
+                    >
+                      {step}
+                    </button>
+                    <span className={`text-xs font-medium ${currentStep === step ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-400 dark:text-slate-500'}`}>
+                      {STEP_TITLES[step - 1]}
+                    </span>
+                  </div>
                   {step < 6 && (
-                    <div className={`flex-1 h-1 rounded ${currentStep > step ? 'bg-emerald-600' : 'bg-slate-200 dark:bg-slate-700'}`} />
+                    <div className={`flex-1 h-0.5 rounded self-start mt-5 ${currentStep > step ? 'bg-emerald-600' : 'bg-slate-200 dark:bg-slate-700'}`} />
                   )}
                 </React.Fragment>
               ))}
