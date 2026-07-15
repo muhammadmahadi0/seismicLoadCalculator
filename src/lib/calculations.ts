@@ -77,12 +77,21 @@ export function calculateSeismicParameters(
     siteClass = 'D'; // Default
   }
 
-  // Get spectral accelerations
+  // Get spectral accelerations (mapped from hazard map, or estimated from Z)
   const { ss, s1 } = getDefaultSpectralAccelerations(project.location);
 
   // Get site coefficients (Fa, Fv for SDS/SD1)
-  const fa = siteClass !== 'F' || !siteSpecificCoeffs ? getFa(siteClass, ss) : siteSpecificCoeffs.s;
-  const fv = siteClass !== 'F' || !siteSpecificCoeffs ? getFv(siteClass, s1) : siteSpecificCoeffs.s;
+  // For Site Class F: getFa/Fv return 0 (need site-specific study)
+  // If site-specific response spectrum coefficients are provided, use
+  // Site Class D Fa/Fv as a conservative default for SDC determination
+  let fa: number, fv: number;
+  if (siteClass === 'F' && siteSpecificCoeffs) {
+    fa = getFa('D', ss);
+    fv = getFv('D', s1);
+  } else {
+    fa = getFa(siteClass, ss);
+    fv = getFv(siteClass, s1);
+  }
 
   // Get normalized response spectrum coefficients (S, TB, TC, TD)
   let siteCoeffs: SiteCoefficients;
@@ -92,9 +101,9 @@ export function calculateSeismicParameters(
     siteCoeffs = getSiteCoefficients(siteClass);
   }
 
-  // Calculate SDS and SD1 (BNBC 6.4.2)
-  const sds = (2 / 3) * fa * z;
-  const sd1 = (2 / 3) * fv * z;
+  // Calculate SDS and SD1 (BNBC 6.4.2) — using S_s and S_1, NOT Z
+  const sds = (2 / 3) * fa * ss;
+  const sd1 = (2 / 3) * fv * s1;
 
   // Get system parameters
   const system = SEISMIC_SYSTEMS[seismicSystem];
@@ -111,12 +120,12 @@ export function calculateSeismicParameters(
   // Calculate approximate period (Ta)
   const ta = calculateTa(buildingHeight, seismicSystem);
 
-  // Calculate total seismic weight (W)
-  // W = Total Dead Load + 25% of Live Load (per BNBC 6.4.2)
+  // Calculate total seismic weight (W) — per BNBC 6.4.2
+  // W = (Dead Load + 25% Live Load) × Floor Area × Number of Stories
   const totalDeadLoad = loads.deadLoad * geometry.slabArea;
   const additionalDead = loads.additionalDeadLoad * geometry.slabArea;
   const liveLoadComponent = loads.liveLoad * geometry.slabArea * 0.25;
-  const totalWeight = totalDeadLoad + additionalDead + liveLoadComponent;
+  const totalWeight = (totalDeadLoad + additionalDead + liveLoadComponent) * geometry.numberOfStories;
 
   // Calculate Normalized Response Spectrum (C_s) at period Ta
   const cs = calculateCs(ta, siteCoeffs);
@@ -126,8 +135,8 @@ export function calculateSeismicParameters(
   const sa = calculateSa(z, i, cs);
 
   // Calculate Base Shear (V) per BNBC 2020
-  // V = S_a * W
-  const v = siteClass === 'F' && !siteSpecificCoeffs ? 0 : sa * totalWeight;
+  // V = S_a × W / R  (R = Response Modification Factor per BNBC 6.4.2)
+  const v = siteClass === 'F' && !siteSpecificCoeffs ? 0 : (sa * totalWeight) / r;
 
   // Calculate navg for display
   const navg = calculateNavg(sptData);

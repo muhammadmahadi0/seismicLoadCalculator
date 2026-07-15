@@ -213,12 +213,17 @@ export function getSDC(sds: number, sd1: number, occupancy: OccupancyCategory): 
   return sdc;
 }
 
-// Default spectral accelerations for Bangladesh (Dhaka example)
+// BNBC 2020 — Default spectral accelerations derived from zone coefficient Z
+// S_s (0.2s) and S_1 (1.0s) estimated per standard code relationships:
+//   S_s = 2.5 × Z   (short-period spectral acceleration)
+//   S_1 = 1.25 × Z  (1-second spectral acceleration)
+// These approximate the mapped values for Bangladesh rock sites.
 export function getDefaultSpectralAccelerations(location: Location): { ss: number; s1: number } {
-  // For Bangladesh, use conservative estimates
   const z = LOCATION_DATA[location].z;
-  // Simplified: Ss = 1.0g for all, S1 = 0.4g (typical for Bangladesh)
-  return { ss: 1.0, s1: 0.4 };
+  return {
+    ss: Math.round(2.5 * z * 1000) / 1000,
+    s1: Math.round(1.25 * z * 1000) / 1000,
+  };
 }
 
 // Default SPT Data
