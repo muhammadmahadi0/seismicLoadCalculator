@@ -23,7 +23,7 @@ interface StepIndicatorProps {
 
 export function StepIndicator({ currentStep, onStepClick }: StepIndicatorProps) {
   return (
-    <div className="w-64 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 min-h-screen p-4">
+    <div className="hidden lg:block w-64 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 min-h-screen p-4">
       <div className="mb-6">
         <h1 className="text-xl font-bold text-emerald-600 dark:text-emerald-400">BNBC Seismic</h1>
         <p className="text-xs text-slate-500 dark:text-slate-400">Calculator for ETABS</p>

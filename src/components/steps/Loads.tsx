@@ -14,7 +14,7 @@ export function LoadsStep() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-100 mb-2">Loads & Weight</h2>
+        <h2 className="text-xl md:text-2xl font-bold text-slate-800 dark:text-slate-100 mb-2">Loads & Weight</h2>
         <p className="text-slate-500 dark:text-slate-400">Enter design loads for seismic weight calculation</p>
       </div>
 

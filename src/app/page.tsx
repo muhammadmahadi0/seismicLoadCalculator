@@ -16,7 +16,7 @@ function StepNavigation() {
   const canProceed = currentStep < 6;
 
   return (
-    <div className="flex justify-between items-center mt-8 pt-6 border-t border-slate-200 dark:border-slate-700">
+    <div className="flex flex-wrap justify-between items-center gap-3 mt-8 pt-6 border-t border-slate-200 dark:border-slate-700">
       <Button
         variant="secondary"
         onClick={() => setCurrentStep(Math.max(1, currentStep - 1))}
@@ -68,11 +68,11 @@ export default function Home() {
       <StepIndicator currentStep={currentStep} onStepClick={setCurrentStep} />
 
       {/* Main Content */}
-      <main className="flex-1 p-8 overflow-auto">
+      <main className="flex-1 p-4 md:p-8 overflow-auto">
         <div className="max-w-4xl mx-auto">
-          <header className="mb-8">
-            <h1 className="text-3xl font-bold text-slate-800 dark:text-slate-100">BNBC 2020 Seismic Calculator</h1>
-            <p className="text-slate-500 dark:text-slate-400 mt-1">
+          <header className="mb-6 md:mb-8">
+            <h1 className="text-xl md:text-3xl font-bold text-slate-800 dark:text-slate-100">BNBC 2020 Seismic Calculator</h1>
+            <p className="text-slate-500 dark:text-slate-400 mt-1 text-sm md:text-base">
               Calculate seismic loads for ETABS analysis based on Bangladesh National Building Code 2020
             </p>
           </header>
@@ -85,7 +85,7 @@ export default function Home() {
                   <button
                     onClick={() => setCurrentStep(step)}
                     className={`
-                      w-10 h-10 rounded-full flex items-center justify-center font-medium text-sm
+                      w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center font-medium text-xs md:text-sm
                       transition-all duration-200
                       ${currentStep >= step
                         ? 'bg-emerald-600 text-white'
@@ -96,7 +96,7 @@ export default function Home() {
                     {step}
                   </button>
                   {step < 6 && (
-                    <div className={`flex-1 h-1 rounded ${currentStep > step ? 'bg-emerald-600' : 'bg-slate-200 dark:bg-slate-700'}`} />
+                    <div className={`flex-1 h-0.5 md:h-1 rounded ${currentStep > step ? 'bg-emerald-600' : 'bg-slate-200 dark:bg-slate-700'}`} />
                   )}
                 </React.Fragment>
               ))}

@@ -75,12 +75,12 @@ export function SoilDataStep() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-100 mb-2">Soil / Site Classification</h2>
+        <h2 className="text-xl md:text-2xl font-bold text-slate-800 dark:text-slate-100 mb-2">Soil / Site Classification</h2>
         <p className="text-slate-500 dark:text-slate-400">Enter SPT N-values or select site class directly</p>
       </div>
 
       <Card>
-        <div className="flex justify-between items-center mb-4">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-4">
           <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-100">SPT-N Data</h3>
           <Button
             variant="secondary"
@@ -200,7 +200,7 @@ export function SoilDataStep() {
           </div>
 
           {siteSpecificEnabled && (
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
               <Input
                 label="S (Spectral Accel.)"
                 type="number"
@@ -240,7 +240,7 @@ export function SoilDataStep() {
 
       <div className="bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg p-4">
         <h4 className="font-medium text-slate-700 dark:text-slate-300 mb-2">BNBC 2020 Site Class Guidelines</h4>
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-2 text-sm text-slate-600 dark:text-slate-400">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 text-sm text-slate-600 dark:text-slate-400">
           <div><strong>A</strong>: Hard Rock (Navg &gt; 50)</div>
           <div><strong>B</strong>: Rock (Navg 16-50)</div>
           <div><strong>C</strong>: Very Dense/Soft Rock (Navg 8-16)</div>

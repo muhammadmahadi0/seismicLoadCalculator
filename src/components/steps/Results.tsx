@@ -43,12 +43,12 @@ export function ResultsStep() {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-start">
+      <div className="flex flex-col sm:flex-row justify-between items-start gap-3">
         <div>
-          <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-100 mb-2">Seismic Design Parameters</h2>
+          <h2 className="text-xl md:text-2xl font-bold text-slate-800 dark:text-slate-100 mb-2">Seismic Design Parameters</h2>
           <p className="text-slate-500 dark:text-slate-400">BNBC 2020 calculations - Ready for ETABS input</p>
         </div>
-        <Button onClick={handleCopyAll}>
+        <Button onClick={handleCopyAll} className="w-full sm:w-auto">
           {copiedAll ? '✓ Copied!' : '📋 Copy All for ETABS'}
         </Button>
       </div>
@@ -255,7 +255,7 @@ export function ResultsStep() {
           {etabsOutput}
         </pre>
         <div className="mt-4 flex gap-2">
-          <Button onClick={handleCopyAll} variant="secondary">
+          <Button onClick={handleCopyAll} variant="secondary" className="w-full sm:w-auto">
             {copiedAll ? '✓ Copied!' : 'Copy All Parameters'}
           </Button>
         </div>
